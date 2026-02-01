@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Случайные мопсы</title>
+</head>
+<body>
+    <div class="container">
+        <h1>🐶 Случайный мопс</h1>
+        
+        <div id="image-container">
+            <img id="mops-image" src="" alt="Случайный мопс">
+        </div>
+        
+        <div class="caption" id="caption"></div>
+        
+        <button onclick="generateRandomMops()">Показать другого мопса</button>
+    </div>
+
+    <script>
+        const mopsImages = [
+            'mops 1.jpg',
+            'mops 2.webp', 
+            'mops 3.webp'
+        ];
+        
+        const mopsCaptions = [
+            "Мопс 1: Акакий",
+            "Мопс 2: Инокентий",
+            "Мопс 3: Олег"
+        ];
+
+        function getRandomElement(array) {
+            const randomIndex = Math.floor(Math.random() * array.length);
+            return array[randomIndex];
+        }
+
+        function generateRandomMops() {
+            const randomImage = getRandomElement(mopsImages);
+            const randomCaption = getRandomElement(mopsCaptions);
+            
+            document.getElementById('mops-image').src = randomImage;
+            document.getElementById('mops-image').alt = "Мопс " + (mopsImages.indexOf(randomImage) + 1);
+            document.getElementById('caption').textContent = randomCaption;
+        }
+
+        window.onload = generateRandomMops;
+    </script>
+</body>
+</html>

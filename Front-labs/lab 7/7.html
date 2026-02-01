@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анализатор содержимого веб-страницы</title>
+    <script src="7.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Анализатор содержимого веб-страницы</h1>
+        
+        <div class="upload-section">
+            <h2>Загрузите HTML файл для анализа</h2>
+            <input type="file" id="htmlFileInput" accept=".html,.htm" />
+            <button onclick="analyzeHTML()">Анализировать HTML</button>
+        </div>
+
+        <div class="results-section">
+            <div class="tab">
+                <button class="tablinks active" onclick="openTab(event, 'Summary')">Сводка</button>
+                <button class="tablinks" onclick="openTab(event, 'Elements')">Элементы</button>
+                <button class="tablinks" onclick="openTab(event, 'Scripts')">Скрипты</button>
+                <button class="tablinks" onclick="openTab(event, 'Links')">Ссылки</button>
+                <button class="tablinks" onclick="openTab(event, 'Images')">Изображения</button>
+            </div>
+
+            <div id="Summary" class="tabcontent" style="display:block;">
+                <h3>Сводная информация</h3>
+                <div id="summaryResults"></div>
+            </div>
+
+            <div id="Elements" class="tabcontent">
+                <h3>Анализ HTML элементов</h3>
+                <div id="elementsResults"></div>
+            </div>
+
+            <div id="Scripts" class="tabcontent">
+                <h3>Анализ JavaScript файлов</h3>
+                <div id="scriptsResults"></div>
+            </div>
+
+            <div id="Links" class="tabcontent">
+                <h3>Анализ ссылок</h3>
+                <div id="linksResults"></div>
+            </div>
+
+            <div id="Images" class="tabcontent">
+                <h3>Анализ изображений</h3>
+                <div id="imagesResults"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

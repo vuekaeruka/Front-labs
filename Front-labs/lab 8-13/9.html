@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обратный порядок слов</title>
+</head>
+<body>
+    <h1>Обратный порядок слов</h1>
+    
+    <div>
+        <label for="inputText">Введите текст:</label><br>
+        <textarea id="inputText" rows="4" cols="50" placeholder="Введите текст здесь..."></textarea>
+    </div>
+    
+    <div>
+        <button onclick="processText()">Преобразовать</button>
+    </div>
+    
+    <div>
+        <label for="outputText">Результат:</label><br>
+        <textarea id="outputText" rows="4" cols="50" readonly></textarea>
+    </div>
+
+    <script>
+        function reverseWordsOrder(str) {
+            const words = str.trim().split(/\s+/);
+            
+            return words.reverse().join(' ');
+        }
+
+        function processText() {
+            const inputText = document.getElementById('inputText').value;
+            const result = reverseWordsOrder(inputText);
+            document.getElementById('outputText').value = result;
+        }
+    </script>
+</body>
+</html>

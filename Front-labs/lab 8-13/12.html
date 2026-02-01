@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Однократная страница</title>
+</head>
+<body>
+    <div id="content">
+        <h1>Первая загрузка</h1>
+        <p>Эта страница загружена впервые</p>
+        <button onclick="reloadPage()">Обновить страницу</button>
+        <button onclick="resetPage()">Сбросить</button>
+    </div>
+
+    <script>
+        if (localStorage.getItem('pageLoaded') === 'true') {
+            window.stop();
+            document.body.innerHTML = `
+                <h1>Страница заблокирована</h1>
+                <p>Закройте БРАУЗЕР полностью чтобы снова получить доступ</p>
+                <button onclick="reloadPage()">Попробовать обновить</button>
+                <button onclick="resetPage()">Сбросить</button>
+            `;
+        } else {
+            localStorage.setItem('pageLoaded', 'true');
+        }
+
+        function reloadPage() {
+            location.reload();
+        }
+
+        function resetPage() {
+            localStorage.removeItem('pageLoaded');
+            location.reload();
+        }
+    </script>
+</body>
+</html>

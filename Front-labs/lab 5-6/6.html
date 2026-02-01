@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор экзаменационных билетов</title>
+</head>
+<body>
+    <h1>Генератор экзаменационных билетов</h1>
+    
+    <div>
+        <label for="totalTickets">Общее количество билетов:</label>
+        <input type="number" id="totalTickets" min="1" value="30">
+    </div>
+    
+    <div>
+        <label for="studentsCount">Количество студентов:</label>
+        <input type="number" id="studentsCount" min="1" value="25">
+    </div>
+    
+    <div>
+        <label for="timerSeconds">Таймер (секунды):</label>
+        <input type="number" id="timerSeconds" min="1" value="10">
+    </div>
+    
+    <button onclick="generateTickets()">Сгенерировать билеты</button>
+    <button onclick="startTimer()">Запустить таймер</button>
+    <button onclick="stopTimer()">Остановить таймер</button>
+    
+    <h2>Результаты:</h2>
+    <div id="results"></div>
+    
+    <h2>Таймер:</h2>
+    <div id="timerDisplay">Таймер не запущен</div>
+    
+    <h2>Информация:</h2>
+    <div id="infoMessage"></div>
+
+    <script>
+        let timerInterval = null;
+        let currentTimer = 0;
+        let ticketSequence = [];
+        let currentStudentIndex = 0;
+        const infoMessages = [
+            "Генерация случайной последовательности...",
+            "Проверка на уникальность номеров...",
+            "Подготовка к выдаче билетов...",
+            "Система готова к работе",
+            "Ожидание запуска таймера..."
+        ];
+        let messageIndex = 0;
+
+        function generateTickets() {
+            const totalTickets = parseInt(document.getElementById('totalTickets').value);
+            const studentsCount = parseInt(document.getElementById('studentsCount').value);
+            
+            if (studentsCount > totalTickets) {
+                alert('Количество студентов не может превышать общее количество билетов!');
+                return;
+            }
+            
+            const allTickets = Array.from({length: totalTickets}, (_, i) => i + 1);
+
+            ticketSequence = shuffleArray([...allTickets]).slice(0, studentsCount);
+            currentStudentIndex = 0;
+            
+            displayResults();
+            showInfoMessage("Последовательность билетов сгенерирована!");
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function displayResults() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            
+            if (ticketSequence.length === 0) {
+                resultsDiv.innerHTML = '<p>Билеты еще не сгенерированы</p>';
+                return;
+            }
+            
+            const table = document.createElement('table');
+            table.innerHTML = `
+                <tr>
+                    <th>№ студента</th>
+                    <th>Номер билета</th>
+                    <th>Статус</th>
+                </tr>
+            `;
+            
+            ticketSequence.forEach((ticket, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${ticket}</td>
+                    <td>${index < currentStudentIndex ? '✅ Выдан' : '⏳ Ожидание'}</td>
+                `;
+                table.appendChild(row);
+            });
+            
+            resultsDiv.appendChild(table);
+        }
+
+        function startTimer() {
+            if (ticketSequence.length === 0) {
+                alert('Сначала сгенерируйте билеты!');
+                return;
+            }
+            
+            const timerSeconds = parseInt(document.getElementById('timerSeconds').value);
+            currentTimer = timerSeconds;
+            
+            stopTimer();
+            
+            updateTimerDisplay();
+            startInfoMessages();
+            
+            timerInterval = setInterval(() => {
+                currentTimer--;
+                updateTimerDisplay();
+                
+                if (currentTimer <= 0) {
+                    giveTicketToNextStudent();
+                    currentTimer = timerSeconds;
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            document.getElementById('timerDisplay').textContent = 'Таймер остановлен';
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timerDisplay').textContent = 
+                `Осталось: ${currentTimer} сек. до следующего билета`;
+        }
+
+        function giveTicketToNextStudent() {
+            if (currentStudentIndex < ticketSequence.length) {
+                currentStudentIndex++;
+                displayResults();
+                
+                if (currentStudentIndex === ticketSequence.length) {
+                    stopTimer();
+                    showInfoMessage("Все билеты выданы!");
+                } else {
+                    showInfoMessage(`Выдан билет студенту ${currentStudentIndex}`);
+                }
+            }
+        }
+
+        function startInfoMessages() {
+            messageIndex = 0;
+            const infoInterval = setInterval(() => {
+                if (!timerInterval) {
+                    clearInterval(infoInterval);
+                    return;
+                }
+                showInfoMessage(infoMessages[messageIndex]);
+                messageIndex = (messageIndex + 1) % infoMessages.length;
+            }, 2000);
+        }
+
+        function showInfoMessage(message) {
+            document.getElementById('infoMessage').textContent = 
+                new Date().toLocaleTimeString() + ' - ' + message;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            showInfoMessage("Система готова к работе. Введите параметры и нажмите 'Сгенерировать билеты'");
+        });
+    </script>
+</body>
+</html>

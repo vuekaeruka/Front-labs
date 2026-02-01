@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Объект Квартира</title>
+</head>
+<body>
+    <h2>Управление квартирой</h2>
+    
+    <div>
+        <button onclick="createApartment()">Создать квартиру</button>
+        <button onclick="showInfo()">Показать информацию</button>
+        <button onclick="sellApartment()">Продать квартиру</button>
+        <button onclick="increasePrice()">Увеличить цену</button>
+    </div>
+
+    <div id="output" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc;"></div>
+
+    <script>
+        let apartment;
+
+        function Apartment(number, area, rooms, floor, price) {
+            this.number = number;
+            this.area = area;
+            this.rooms = rooms;
+            this.floor = floor;
+            this.price = price;
+            this.isSold = false;
+        }
+
+        Apartment.prototype.getInfo = function() {
+            return `Кв.${this.number}: ${this.rooms}к, ${this.area}м², ${this}эт. - $${this.price} ${this.isSold ? '(Продана)' : ''}`;
+        };
+
+        Apartment.prototype.sell = function() {
+            this.isSold = true;
+            return `Квартира №${this.number} продана!`;
+        };
+
+        Apartment.prototype.increasePrice = function(amount) {
+            this.price += amount;
+            return `Цена увеличена до $${this.price}`;
+        };
+
+        function createApartment() {
+            apartment = new Apartment(45, 75, 3, 7, 150000);
+            showOutput('Квартира создана!');
+        }
+
+        function showInfo() {
+            if (!apartment) {
+                showOutput('Сначала создайте квартиру!');
+                return;
+            }
+            showOutput(apartment.getInfo());
+        }
+
+        function sellApartment() {
+            if (!apartment) {
+                showOutput('Сначала создайте квартиру!');
+                return;
+            }
+            showOutput(apartment.sell());
+        }
+
+        function increasePrice() {
+            if (!apartment) {
+                showOutput('Сначала создайте квартиру!');
+                return;
+            }
+            showOutput(apartment.increasePrice(10000));
+        }
+
+        function showOutput(message) {
+            document.getElementById('output').innerHTML = message;
+        }
+    </script>
+</body>
+</html>

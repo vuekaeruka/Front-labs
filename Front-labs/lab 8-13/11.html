@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тестирование метода Date.max()</title>
+</head>
+<body>
+    <h1>Тестирование метода Date.max()</h1>
+    <div id="output"></div>
+
+    <script>
+        Date.prototype.max = function(date) {
+            if (!(date instanceof Date)) {
+                throw new Error('Аргумент должен быть объектом Date');
+            }
+            return this.getTime() > date.getTime() ? this : date;
+        };
+
+        function logToHTML(message) {
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.innerHTML = message;
+            output.appendChild(div);
+        }
+
+        function runTests() {
+            logToHTML('<h2>=== Тестирование метода Date.max() ===</h2>');
+
+            const now = new Date();
+            const past = new Date(2020, 0, 1);
+            const result1 = now.max(past);
+            logToHTML('<h3>Тест 1 - Текущая дата > прошлой:</h3>');
+            logToHTML(`now: ${now.toLocaleString()}<br>`);
+            logToHTML(`past: ${past.toLocaleString()}<br>`);
+            logToHTML(`max: ${result1.toLocaleString()}<br>`);
+            logToHTML(`Результат: <b>${result1.getTime() === now.getTime() ? 'PASS' : 'FAIL'}</b><br>`);
+
+            const future = new Date(2030, 11, 31);
+            const result2 = past.max(future);
+            logToHTML('<h3>Тест 2 - Прошлая дата < будущей:</h3>');
+            logToHTML(`past: ${past.toLocaleString()}<br>`);
+            logToHTML(`future: ${future.toLocaleString()}<br>`);
+            logToHTML(`max: ${result2.toLocaleString()}<br>`);
+            logToHTML(`Результат: <b>${result2.getTime() === future.getTime() ? 'PASS' : 'FAIL'}</b><br>`);
+
+            const date1 = new Date(2023, 5, 15);
+            const date2 = new Date(2023, 5, 15);
+            const result3 = date1.max(date2);
+            logToHTML('<h3>Тест 3 - Одинаковые даты:</h3>');
+            logToHTML(`date1: ${date1.toLocaleString()}<br>`);
+            logToHTML(`date2: ${date2.toLocaleString()}<br>`);
+            logToHTML(`max: ${result3.toLocaleString()}<br>`);
+            logToHTML(`Результат: <b>${result3.getTime() === date1.getTime() ? 'PASS' : 'FAIL'}</b><br>`);
+
+            const early = new Date(2023, 5, 15, 10, 30, 0, 0);
+            const late = new Date(2023, 5, 15, 10, 30, 0, 1);
+            const result4 = early.max(late);
+            logToHTML('<h3>Тест 4 - Разница в 1 миллисекунду:</h3>');
+            logToHTML(`early: ${early.toLocaleString()}<br>`);
+            logToHTML(`late: ${late.toLocaleString()}<br>`);
+            logToHTML(`max: ${result4.toLocaleString()}<br>`);
+            logToHTML(`Результат: <b>${result4.getTime() === late.getTime() ? 'PASS' : 'FAIL'}</b><br>`);
+
+            logToHTML('<h3>Тест 5 - Обработка неверного аргумента:</h3>');
+            try {
+                now.max('не дата');
+                logToHTML('Результат: <b>FAIL</b> - должно быть исключение<br>');
+            } catch (error) {
+                logToHTML(`Результат: <b>PASS</b> - ${error.message}<br>`);
+            }
+        }
+
+        function demonstrateUsage() {
+            logToHTML('<h2>=== Демонстрация использования ===</h2>');
+            
+            const birthday = new Date(1990, 5, 15);
+            const anniversary = new Date(2015, 8, 20);
+
+            logToHTML('Дата рождения: ' + birthday.toLocaleDateString() + '<br>');
+            logToHTML('Годовщина: ' + anniversary.toLocaleDateString() + '<br>');
+
+            const latestDate = birthday.max(anniversary);
+            logToHTML('Более поздняя дата: <b>' + latestDate.toLocaleDateString() + '</b><br>');
+        }
+
+        runTests();
+        demonstrateUsage();
+    </script>
+</body>
+</html>

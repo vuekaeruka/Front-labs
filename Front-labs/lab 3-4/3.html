@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Проверка даты</title>
+</head>
+<body>
+    <h1>Проверка корректности даты ДД.ММ.ГГГГ</h1>
+    
+    <input type="text" id="dateInput" placeholder="Введите дату (ДД.ММ.ГГГГ)">
+    <button onclick="checkDate()">Проверить</button>
+    
+    <p id="result"></p>
+
+    <script>
+        function isValidDate(dateString) {
+            const dateRegex = /^(\d{2})\.(\d{2})\.(\d{4})$/;
+            const match = dateString.match(dateRegex);
+            
+            if (!match) return false;
+            
+            const day = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10);
+            const year = parseInt(match[3], 10);
+            
+            if (month < 1 || month > 12) return false;
+            
+            const daysInMonth = new Date(year, month, 0).getDate();
+            if (day < 1 || day > daysInMonth) return false;
+            
+            if (year < 1000 || year > 9999) return false;
+            
+            return true;
+        }
+
+        function checkDate() {
+            const input = document.getElementById('dateInput').value;
+            const resultElement = document.getElementById('result');
+            
+            if (isValidDate(input)) {
+                resultElement.textContent = '✅ Дата корректна!';
+                resultElement.style.color = 'green';
+            } else {
+                resultElement.textContent = '❌ Дата некорректна!';
+                resultElement.style.color = 'red';
+            }
+        }
+    </script>
+</body>
+</html>

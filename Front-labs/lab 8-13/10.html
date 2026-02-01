@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Собери мозаику</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .game-area {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        
+        .puzzle-board {
+            width: 400px;
+            height: 400px;
+            border: 3px solid #4a5568;
+            background: #f7fafc;
+            border-radius: 15px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .puzzle-pieces-area {
+            width: 400px;
+            min-height: 200px;
+            border: 3px dashed #a0aec0;
+            background: rgba(247, 250, 252, 0.8);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .puzzle-piece {
+            cursor: grab;
+            border: 2px solid #2d3748;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .puzzle-piece:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        
+        .puzzle-piece.dragging {
+            cursor: grabbing;
+            opacity: 0.9;
+            z-index: 1000;
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .puzzle-piece.correct {
+            cursor: default;
+            border-color: #48bb78;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .original-image {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .original-image h2 {
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+        
+        #original-img {
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border: 3px solid #4a5568;
+        }
+        
+        .completion-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 10000;
+            display: none;
+        }
+        
+        .completion-message h2 {
+            color: #48bb78;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        
+        .completion-message p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: #4a5568;
+        }
+        
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .puzzle-board, .puzzle-pieces-area {
+                width: 300px;
+                height: 300px;
+            }
+            
+            #original-img {
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Соберите мозаику 🎨</h1>
+        
+        <div class="controls">
+            <button onclick="shufflePieces()">🔀 Перемешать</button>
+            <button onclick="showOriginal()">👀 Показать оригинал</button>
+            <button onclick="checkProgress()">✅ Проверить</button>
+        </div>
+        
+        <div class="game-area">
+            <div class="puzzle-board" id="puzzle-board"></div>
+            <div class="puzzle-pieces-area" id="puzzle-pieces"></div>
+        </div>
+        
+        <div class="original-image">
+            <h2>Исходное изображение</h2>
+            <img id="original-img" src="" alt="Оригинал изображения">
+        </div>
+    </div>
+
+    <div class="completion-message" id="completion-message">
+        <h2>🎉 Поздравляем! 🎉</h2>
+        <p>Вы успешно собрали мозаику!</p>
+        <button onclick="hideCompletionMessage()">Продолжить</button>
+    </div>
+
+    <script>
+
+        const imageUrl = '10.png';
+        const gridSize = 4; 
+        const pieceSize = 100; 
+
+        let puzzlePieces = [];
+        let draggedPiece = null;
+        let offsetX, offsetY;
+        let originalVisible = false;
+
+        function initGame() {
+            const board = document.getElementById('puzzle-board');
+            const piecesArea = document.getElementById('puzzle-pieces');
+
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = function() {
+                const sourceCanvas = document.createElement('canvas');
+                const sourceCtx = sourceCanvas.getContext('2d');
+                sourceCanvas.width = img.width;
+                sourceCanvas.height = img.height;
+                sourceCtx.drawImage(img, 0, 0);
+
+                for (let y = 0; y < gridSize; y++) {
+                    for (let x = 0; x < gridSize; x++) {
+                        createPuzzlePiece(sourceCtx, x, y, img.width, img.height);
+                    }
+                }
+
+                document.getElementById('original-img').src = imageUrl;
+
+                shufflePieces();
+            };
+            img.onerror = function() {
+                alert('Ошибка загрузки изображения. Используется заглушка.');
+                img.src = 'https://placehold.co/600x600/667eea/white?text=Ошибка+загрузки';
+            };
+            img.src = imageUrl;
+        }
+
+        function createPuzzlePiece(sourceCtx, x, y, imgWidth, imgHeight) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = pieceSize;
+            canvas.height = pieceSize;
+
+            const sliceWidth = imgWidth / gridSize;
+            const sliceHeight = imgHeight / gridSize;
+            
+            ctx.drawImage(
+                sourceCtx.canvas,
+                x * sliceWidth, y * sliceHeight, sliceWidth, sliceHeight,
+                0, 0, pieceSize, pieceSize
+            );
+
+            const piece = document.createElement('div');
+            piece.className = 'puzzle-piece';
+            piece.style.width = pieceSize + 'px';
+            piece.style.height = pieceSize + 'px';
+            piece.dataset.originalX = x;
+            piece.dataset.originalY = y;
+            piece.dataset.correct = 'false';
+            
+            piece.appendChild(canvas);
+
+            piece.addEventListener('mousedown', startDrag);
+            piece.addEventListener('touchstart', startDragTouch, { passive: false });
+            
+            document.getElementById('puzzle-pieces').appendChild(piece);
+            puzzlePieces.push(piece);
+        }
+
+        function shufflePieces() {
+            const piecesArea = document.getElementById('puzzle-pieces');
+            const board = document.getElementById('puzzle-board');
+
+            while (board.firstChild) {
+                board.removeChild(board.firstChild);
+            }
+
+            puzzlePieces.forEach(piece => {
+                piece.dataset.correct = 'false';
+                piece.classList.remove('correct');
+                piece.style.position = 'static';
+                piecesArea.appendChild(piece);
+            });
+
+            const piecesArray = Array.from(puzzlePieces);
+            for (let i = piecesArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                piecesArea.appendChild(piecesArray[j]);
+            }
+        }
+
+        function startDrag(e) {
+            draggedPiece = this;
+            const rect = this.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+            
+            this.classList.add('dragging');
+            this.style.position = 'absolute';
+            this.style.zIndex = '1000';
+        }
+
+        function startDragTouch(e) {
+            e.preventDefault();
+            draggedPiece = this;
+            const touch = e.touches[0];
+            const rect = this.getBoundingClientRect();
+            offsetX = touch.clientX - rect.left;
+            offsetY = touch.clientY - rect.top;
+            
+            document.addEventListener('touchmove', dragTouch, { passive: false });
+            document.addEventListener('touchend', stopDrag);
+            
+            this.classList.add('dragging');
+            this.style.position = 'absolute';
+            this.style.zIndex = '1000';
+        }
+
+        function drag(e) {
+            if (!draggedPiece) return;
+            
+            draggedPiece.style.left = (e.clientX - offsetX) + 'px';
+            draggedPiece.style.top = (e.clientY - offsetY) + 'px';
+        }
+
+        function dragTouch(e) {
+            if (!draggedPiece) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            
+            draggedPiece.style.left = (touch.clientX - offsetX) + 'px';
+            draggedPiece.style.top = (touch.clientY - offsetY) + 'px';
+        }
+
+        function stopDrag() {
+            if (!draggedPiece) return;
+            
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('touchmove', dragTouch);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchend', stopDrag);
+            
+            checkPosition();
+            
+            draggedPiece.classList.remove('dragging');
+            draggedPiece.style.zIndex = '1';
+            draggedPiece = null;
+        }
+
+        function checkPosition() {
+            const board = document.getElementById('puzzle-board');
+            const boardRect = board.getBoundingClientRect();
+            const pieceRect = draggedPiece.getBoundingClientRect();
+
+            if (pieceRect.left < boardRect.right && 
+                pieceRect.right > boardRect.left &&
+                pieceRect.top < boardRect.bottom &&
+                pieceRect.bottom > boardRect.top) {
+                
+                const targetX = parseInt(draggedPiece.dataset.originalX) * pieceSize;
+                const targetY = parseInt(draggedPiece.dataset.originalY) * pieceSize;
+
+                const pieceCenterX = pieceRect.left + pieceSize/2;
+                const pieceCenterY = pieceRect.top + pieceSize/2;
+                
+                const targetCenterX = boardRect.left + targetX + pieceSize/2;
+                const targetCenterY = boardRect.top + targetY + pieceSize/2;
+                
+                if (Math.abs(pieceCenterX - targetCenterX) < 30 && 
+                    Math.abs(pieceCenterY - targetCenterY) < 30) {
+
+                    draggedPiece.style.left = targetX + 'px';
+                    draggedPiece.style.top = targetY + 'px';
+                    draggedPiece.classList.add('correct');
+                    draggedPiece.dataset.correct = 'true';
+                    board.appendChild(draggedPiece);
+                    
+                    checkCompletion();
+                }
+            }
+        }
+
+        function checkCompletion() {
+            const allCorrect = puzzlePieces.every(piece => piece.dataset.correct === 'true');
+            if (allCorrect) {
+                showCompletionMessage();
+            }
+        }
+
+        function showCompletionMessage() {
+            document.getElementById('completion-message').style.display = 'block';
+        }
+
+        function hideCompletionMessage() {
+            document.getElementById('completion-message').style.display = 'none';
+        }
+
+        function showOriginal() {
+            const originalImg = document.getElementById('original-img');
+            originalVisible = !originalVisible;
+            originalImg.style.display = originalVisible ? 'block' : 'none';
+        }
+
+        function checkProgress() {
+            const correctPieces = puzzlePieces.filter(piece => piece.dataset.correct === 'true').length;
+            alert(`Собрано: ${correctPieces} из ${puzzlePieces.length} фрагментов`);
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>

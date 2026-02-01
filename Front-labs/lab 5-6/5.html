@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор случайных чисел</title>
+</head>
+<body>
+    <h1>Генератор случайных целых чисел</h1>
+    
+    <div>
+        <label for="min">Минимальное значение (min):</label>
+        <input type="number" id="min" value="1">
+    </div>
+    
+    <div>
+        <label for="max">Максимальное значение (max):</label>
+        <input type="number" id="max" value="10">
+    </div>
+    
+    <div>
+        <label for="count">Количество чисел:</label>
+        <input type="number" id="count" value="5" min="1" max="100">
+    </div>
+    
+    <button onclick="generateNumbers()">Сгенерировать числа</button>
+    <button onclick="clearResults()">Очистить результаты</button>
+    
+    <div id="results">
+        <h2>Результаты:</h2>
+        <div id="output"></div>
+    </div>
+    
+    <script>
+        function randomInteger(min, max) {
+            if (min > max) {
+                throw new Error('min не может быть больше max');
+            }
+            
+            if (!Number.isInteger(min) || !Number.isInteger(max)) {
+                throw new Error('min и max должны быть целыми числами');
+            }
+            
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        
+        function generateNumbers() {
+            const min = parseInt(document.getElementById('min').value);
+            const max = parseInt(document.getElementById('max').value);
+            const count = parseInt(document.getElementById('count').value);
+            const output = document.getElementById('output');
+            
+            try {
+                output.innerHTML = '';
+                
+                for (let i = 0; i < count; i++) {
+                    const randomNum = randomInteger(min, max);
+                    const p = document.createElement('p');
+                    p.textContent = `Случайное число ${i + 1}: ${randomNum}`;
+                    output.appendChild(p);
+                }
+                
+                const stats = document.createElement('p');
+                stats.innerHTML = `<strong>Диапазон: [${min}..${max}]</strong>`;
+                output.appendChild(stats);
+                
+            } catch (error) {
+                output.innerHTML = `<p style="color: red;">Ошибка: ${error.message}</p>`;
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('output').innerHTML = '';
+        }
+        
+        window.onload = function() {
+            generateNumbers();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Результаты поиска</title>
+    <script src="records.js"></script>
+    <script>
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        function performSearch(query) {
+            if (!query) return [];
+
+            let isHtmlMode = query.trim().toLowerCase() === 'html';
+            let isUrlPrefix = query.toLowerCase().startsWith('url:');
+            let terms = [];
+            let operator = 'OR';
+
+            if (query.startsWith('+')) {
+                operator = 'AND';
+                query = query.substring(1).trim();
+            }
+
+            if (isUrlPrefix) {
+                let urlTerm = query.substring(4).trim().toLowerCase();
+                return records.filter(record => {
+                    let [url, title, desc] = record.split('|');
+                    return url.toLowerCase().includes(urlTerm);
+                });
+            } else if (isHtmlMode) {
+                return records.filter(record => {
+                    let [url] = record.split('|');
+                    return url.toLowerCase().includes('html');
+                });
+            } else {
+                terms = query.split(/\s+/).map(term => term.toLowerCase());
+            }
+
+            return records.filter(record => {
+                let [url, title, desc] = record.split('|');
+                let content = (title + ' ' + desc).toLowerCase(); 
+                if (operator === 'AND') {
+                    return terms.every(term => content.includes(term));
+                } else { 
+                    return terms.some(term => content.includes(term));
+                }
+            });
+        }
+
+        function displayResults(results, page) {
+            const resultsPerPage = 10;
+            const start = (page - 1) * resultsPerPage;
+            const end = start + resultsPerPage;
+            const paginatedResults = results.slice(start, end);
+
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = '';
+
+            let isHtmlMode = getQueryParam('q').trim().toLowerCase() === 'html';
+
+            paginatedResults.forEach(record => {
+                let [url, title, desc] = record.split('|');
+                let resultDiv = document.createElement('div');
+                if (isHtmlMode) {
+                    resultDiv.innerHTML = `<p><strong>URL:</strong> <a href="${url}">${url}</a><br>${desc}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p><strong>${title}</strong><br><a href="${url}">${url}</a><br>${desc}</p>`;
+                }
+                container.appendChild(resultDiv);
+            });
+
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            const totalPages = Math.ceil(results.length / resultsPerPage);
+
+            if (page > 1) {
+                let prevButton = document.createElement('button');
+                prevButton.textContent = 'Предыдущая';
+                prevButton.onclick = () => displayResults(results, page - 1);
+                pagination.appendChild(prevButton);
+            }
+
+            if (page < totalPages) {
+                let nextButton = document.createElement('button');
+                nextButton.textContent = 'Следующая';
+                nextButton.onclick = () => displayResults(results, page + 1);
+                pagination.appendChild(nextButton);
+            }
+
+            document.getElementById('totalResults').textContent = `Найдено результатов: ${results.length}`;
+        }
+
+        window.onload = () => {
+            const query = getQueryParam('q');
+            if (query) {
+                const results = performSearch(query);
+                displayResults(results, 1);
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Результаты поиска</h1>
+    <p id="totalResults"></p>
+    <div id="resultsContainer"></div>
+    <div id="pagination"></div>
+    <p><a href="index.html">Новый поиск</a> | <a href="help.html">Справка</a></p>
+</body>
+</html>
